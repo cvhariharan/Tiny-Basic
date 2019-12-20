@@ -12,6 +12,7 @@
 #define RUN 12
 #define END 13
 #define THEN 14
+#define ENTER 15
 
 // Operators
 #define PLUS 34

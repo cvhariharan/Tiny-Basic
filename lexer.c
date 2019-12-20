@@ -132,7 +132,8 @@ Token *getTokens(char* input) {
       }
     }
   }
-  
+  tokArr[tokenCount].type = ENTER;
+  tokArr[tokenCount].value = "CR";
   return tokArr;
 }
 
