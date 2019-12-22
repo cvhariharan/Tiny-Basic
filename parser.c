@@ -196,6 +196,9 @@ int parseStatement() {
                 } else {
                     printf("Variable Not Found!");
                 }
+                if(tokArr[tokenIndex].type != COMMA) {
+                  break;
+                }
                 eat(COMMA);
                 var = tokArr[tokenIndex];
                 tokenIndex++;
