@@ -1,2 +1,2 @@
 LET a=2*4
-PRINT a+2, a, a*5
+PRINT a+2, "TEsting some string literals's aye~!", a

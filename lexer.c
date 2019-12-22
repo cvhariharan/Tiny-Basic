@@ -12,8 +12,7 @@ Token *getTokens(char *input) {
     int slen = 0;
     int tokenCount = 0;
 
-    char *literal = malloc(sizeof(char) * MAX_STRLEN);
-    int literalLen = 0;
+    
 
     //If set, treat the input as code else it could be comment or string literal
     int isCode = 1;
@@ -76,35 +75,38 @@ Token *getTokens(char *input) {
         }
 
         //String and character literals
-        if (input[i] == '\'' || input[i] == '\"') {
+        if (input[i] == '\"') {
             //To stop the characters inside quotes to be considered as tokens
-            isCode = !isCode;
-            if (isCode) {
+            // isCode = !isCode;
+            i++;
+            char *literal = malloc(sizeof(char) * MAX_STRLEN);
+            int literalLen = 0;
+            while(input[i] != '\"') {
                 literal[literalLen++] = input[i];
-                literal[literalLen] = '\0';
-                tokArr[tokenCount].type = S_LITERAL;
-                tokArr[tokenCount].value = malloc(sizeof(char) * MAX_TOK_LEN);
-                strcpy(tokArr[tokenCount].value, token);
-                tokenCount++;
-                literalLen = 0;
+                i++;
             }
+            literal[literalLen] = '\0';
+            tokArr[tokenCount].type = S_LITERAL;
+            tokArr[tokenCount].value = malloc(sizeof(char) * MAX_STRLEN);
+            strcpy(tokArr[tokenCount].value, literal);
+            tokenCount++;
         }
-        if (!isCode) {
-            if (input[i] != '\\') {
-                //Escape character
-                literal[literalLen++] = input[i];
-                literal[literalLen] = '\0';
-            } else {
-                if (input[i + 1] == '\'' || input[i + 1] == '\"') {
-                    // To handle escaped quotes, set isCode to true so that when the quote is encountered, it can be treated is first quote
-                    isCode = !isCode;
-                    continue;
-                } else {
-                    // For handling \n, \t type of characters.
-                    i++;
-                }
-            }
-        }
+        // if (!isCode) {
+        //     if (input[i] != '\\') {
+        //         //Escape character
+        //         literal[literalLen++] = input[i];
+        //         literal[literalLen] = '\0';
+        //     } else {
+        //         if (input[i + 1] == '\'' || input[i + 1] == '\"') {
+        //             // To handle escaped quotes, set isCode to true so that when the quote is encountered, it can be treated is first quote
+        //             isCode = !isCode;
+        //             continue;
+        //         } else {
+        //             // For handling \n, \t type of characters.
+        //             i++;
+        //         }
+        //     }
+        // }
 
         //If the first character is a special character
         if ((ispunct(input[i]) && (input[i] != '\'' && input[i] != '\"')) && isCode) {
