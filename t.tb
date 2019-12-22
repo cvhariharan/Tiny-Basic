@@ -1,2 +1,2 @@
-LET a=2
-PRINT a+5
+LET a=2*4
+PRINT a+2, a, a*5
