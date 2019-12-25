@@ -1,6 +1,7 @@
 #define FUNCTION_CALL 200
 #define FUNCTION_PROTO 205
 #define LINES 100
+#define STAKE_SIZE 1024
 
 #include "lexer.h"
 #include "symboltable.h"
@@ -29,6 +30,8 @@ int tokenIndex = 0;
 Token *tokArr;
 char *mappings[LINES];
 char *program[LINES];
+int stack[STAKE_SIZE];
+int sp = -1;
 
 // Program counter
 int pc = 0;
@@ -58,9 +61,7 @@ int main(int argc, char *argv[]) {
     while (fgets(input, 255, (FILE *)fptr)) {
         program[i] = (char *)malloc(sizeof(char) * MAX_STM);
         strcpy(program[i], input);
-        tokenIndex = 0;
-        tokArr = getTokens(program[i]);
-        parseLine();
+        i++;
         // for (int j = 0; j < MAX_TOKENS; j++)
         // {
         //   if (tokArr[j].value != NULL)
@@ -68,9 +69,28 @@ int main(int argc, char *argv[]) {
         //     printf("%s : %d\n", tokArr[j].value, tokArr[j].type);
         //   }
         // }
-        i++;
-        // printf("%d\n", i);
+        // printf("%d\n", pc);
     }
+    while(pc < i) {
+        tokenIndex = 0;
+        tokArr = getTokens(program[pc]);
+        pc++;
+        // printf("DEBUG 1 %d\n", pc);
+        parseLine();
+        // printf("DEBUG %d: %s\n", pc, program[pc]);
+        // for (int j = 0; j < MAX_TOKENS; j++)
+        // {
+        //   if (tokArr[j].value != NULL)
+        //   {
+        //     printf("%s : %d\n", tokArr[j].value, tokArr[j].type);
+        //   }
+        // }
+    }
+    for(int j = 0; j < i; j++) {
+        free(program[i]);
+    }
+    free(tokArr);
+    free(input);
     // }
     return 0;
 }
@@ -82,6 +102,34 @@ int main(int argc, char *argv[]) {
 //   parseLine();
 // }
 
+// Push to stack
+void push(int n) {
+    sp++;
+    stack[sp] = n;
+}
+
+// Pop from stack
+int pop() {
+    return stack[sp--];
+}
+
+// Get the top value from the stack
+int peek() {
+    return stack[sp];
+}
+
+int getLabelPos(char *label) {
+    for(int i = 0; i < LINES; i++) {
+        if(mappings[i] != NULL) {
+            if(strcmp(mappings[i], label) == 0) {
+                return i;
+            }
+        }
+    }
+    return -1;
+}
+
+// advance the tokencount
 void advance() { tokenIndex++; }
 
 Token eat(int type) {
@@ -107,7 +155,8 @@ int getRelational(int token) {
 int parseLine() {
     if (tokArr[tokenIndex].type == NUM) {
         // mappings[pos] = (char *)malloc(sizeof(char) * MAX_TOK_LEN);
-        mappings[pc] = eat(NUM).value;
+        // pc is incremented before parseLine is called, so decrement
+        mappings[pc-1] = eat(NUM).value;
     }
     parseStatement();
     // printf("Oth %s\n", tokArr[tokenIndex].value);
@@ -131,8 +180,9 @@ int parseStatement() {
 
         case PRINT:
             eat(PRINT);
-
-            printf("%s\n", parseExprList());
+            char *val = parseExprList();
+            printf("%s\n", val);
+            free(val);
             break;
 
         case IF: {
@@ -205,6 +255,18 @@ int parseStatement() {
             }
             break;
         }
+
+        case GOSUB: {
+            push(pc);
+            eat(GOSUB);
+            int value = parseExpression();
+            char label[5];
+            sprintf(label, "%d", value);
+            pc = getLabelPos(label);
+            // printf("LABEL %d, POS %d\n", value, n);
+            // printf("Next: %s\n", program[value]);
+        }
+        break;
     }
     eat(ENTER);
     // printf("PRINT\n");
@@ -214,8 +276,6 @@ int parseStatement() {
 char *parseExprList() {
     char *expr = (char *)malloc(sizeof(char) * MAX_INP);
     strcpy(expr, "");
-    //   printf("D: %s - %d\n", tokArr[tokenIndex].value,
-    //   tokArr[tokenIndex].type);
     if (tokArr[tokenIndex].type == S_LITERAL) {
         // printf("Sl\n");
         strcat(expr, tokArr[tokenIndex].value);
@@ -291,7 +351,7 @@ int parseFactor() {
         case NUM: {
             Token var;
             var = eat(NUM);
-
+            // printf("FACTOR: %d\n", atoi(var.value));
             return atoi(var.value);
         }
             // default: error();

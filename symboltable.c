@@ -21,6 +21,12 @@ void insertVariable(char *var, int value, int type) {
     strcpy(s.variable, var);
     s.value = value;
     s.type = type;
+
+    if(getSymbol(var) != NULL) {
+        int pos = getPos(var);
+        st[pos] = s;
+        return;
+    }
     st[stSize] = s;
     // printf("%d - %s\n", stSize, st[stSize].variable);
     stSize++;
@@ -37,4 +43,17 @@ Symbol *getSymbol(char *var) {
         }
     }
     return NULL;
+}
+
+int getPos(char *var) {
+    if (st == NULL) {
+        return -1;
+    }
+    for (int i = 0; i < stSize; i++) {
+        // printf("%d - %s\n", i, st[i].variable);
+        if (*(st[i].variable) == *var) {
+            return i;
+        }
+    }
+    return -1;
 }

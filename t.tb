@@ -1,2 +1,4 @@
-LET a=2*4
-PRINT a+2, "TEsting some string literals's aye~!", a
+LET a=0
+151 LET a = a+1
+PRINT a
+GOSUB 151
