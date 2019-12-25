@@ -6,5 +6,5 @@ A tiny basic interpreter in C. Does not follow the exact language spec as I coul
 - [ ] Error reporting
 
 ```sh
-build/tbc example.tb
+build/tbc examples/fibonacci.tb
 ```
