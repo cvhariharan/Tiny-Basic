@@ -1,7 +1,7 @@
 #define FUNCTION_CALL 200
 #define FUNCTION_PROTO 205
 #define LINES 100
-#define STAKE_SIZE 1024
+#define STAKE_SIZE 2000
 
 #include "lexer.h"
 #include "symboltable.h"
@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
     char *input, *filename;
     FILE *fp;
 
-    tokArr = malloc(sizeof(Token) * MAX_TOKENS);
+    // tokArr = malloc(sizeof(Token) * MAX_TOKENS);
     input = malloc(sizeof(char) * MAX_STRLEN);
     // printf("Started");
     // filename = (char *)malloc(MAX_STRLEN * sizeof(char));
@@ -62,14 +62,6 @@ int main(int argc, char *argv[]) {
         program[i] = (char *)malloc(sizeof(char) * MAX_STM);
         strcpy(program[i], input);
         i++;
-        // for (int j = 0; j < MAX_TOKENS; j++)
-        // {
-        //   if (tokArr[j].value != NULL)
-        //   {
-        //     printf("%s : %d\n", tokArr[j].value, tokArr[j].type);
-        //   }
-        // }
-        // printf("%d\n", pc);
     }
     while(pc < i) {
         tokenIndex = 0;
@@ -85,22 +77,17 @@ int main(int argc, char *argv[]) {
         //     printf("%s : %d\n", tokArr[j].value, tokArr[j].type);
         //   }
         // }
+        free(tokArr);
     }
     for(int j = 0; j < i; j++) {
         free(program[i]);
     }
-    free(tokArr);
+    // free(tokArr);
     free(input);
+    freeTable();
     // }
     return 0;
 }
-
-// Read and execute the line referenced by the PC
-// void next() {
-//   tokArr = getTokens(program[pc]);
-//   pc++;
-//   parseLine();
-// }
 
 // Push to stack
 void push(int n) {
@@ -154,7 +141,6 @@ int getRelational(int token) {
 
 int parseLine() {
     if (tokArr[tokenIndex].type == NUM) {
-        // mappings[pos] = (char *)malloc(sizeof(char) * MAX_TOK_LEN);
         // pc is incremented before parseLine is called, so decrement
         mappings[pc-1] = eat(NUM).value;
     }
@@ -169,11 +155,7 @@ int parseStatement() {
             eat(LET);
             var = eat(ID);
             eat(ASSIGN);
-            // printf("DEBUG1: %s\n", var.value);
             int val = parseExpression();
-            // printf("Stored val: %d", val);
-            // printf("DEBUG2: %d", val);
-            // printf("Test\n");
             insertVariable(var.value, val, NUM);
             break;
         }
@@ -263,8 +245,6 @@ int parseStatement() {
             char label[5];
             sprintf(label, "%d", value);
             pc = getLabelPos(label);
-            // printf("LABEL %d, POS %d\n", value, n);
-            // printf("Next: %s\n", program[value]);
         }
         break;
     }
@@ -298,12 +278,6 @@ char *parseExprList() {
 
 int parseExpression() {
     int op = parseTerm();
-    // printf("DEBUG EXPR: %d\n", op);
-    // if(isRelational(tokArr[tokenIndex].type)) {
-    //   parseRelational();
-    //   parseTerm();
-    // }
-    // else {
     switch (tokArr[tokenIndex].type) {
         case PLUS:
             eat(PLUS);
@@ -320,8 +294,6 @@ int parseExpression() {
 
 int parseTerm() {
     int op = parseFactor();
-    // printf("DEBUG TERM: %d\n", op);
-
     switch (tokArr[tokenIndex].type) {
         case MUL:
             eat(MUL);
@@ -338,14 +310,11 @@ int parseTerm() {
 }
 
 int parseFactor() {
-    // printf("PF: \n");
     switch (tokArr[tokenIndex].type) {
         case ID: {
             // printf("ID\n");
             Token var;
             var = eat(ID);
-            // printf("TEST\n");
-            // printf("DEBUG: %d\n", getSymbol(var.value)->value);
             return getSymbol(var.value)->value;
         } break;
         case NUM: {

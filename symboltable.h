@@ -6,3 +6,4 @@ typedef struct Symbols{
 
 Symbol *getSymbol(char *);
 void insertVariable(char *, int, int);
+void freeTable();

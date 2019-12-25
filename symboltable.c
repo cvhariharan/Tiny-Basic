@@ -15,7 +15,7 @@ void insertVariable(char *var, int value, int type) {
         st = (Symbol *)malloc(sizeof(Symbol) * ST_SIZE);
     }
     Symbol s;
-    s.variable = (char *)malloc(sizeof(char) * MAX_TOK_LEN);
+    s.variable = (char *)malloc(sizeof(char) * strlen(var));
     // s.value = (char *)malloc(sizeof(char) * MAX_TOK_LEN);
 
     strcpy(s.variable, var);
@@ -24,6 +24,7 @@ void insertVariable(char *var, int value, int type) {
 
     if(getSymbol(var) != NULL) {
         int pos = getPos(var);
+        free(st[pos].variable);
         st[pos] = s;
         return;
     }
@@ -56,4 +57,8 @@ int getPos(char *var) {
         }
     }
     return -1;
+}
+
+void freeTable() {
+    free(st);
 }
