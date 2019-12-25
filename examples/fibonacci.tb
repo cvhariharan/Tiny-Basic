@@ -1,0 +1,11 @@
+LET a = 0
+LET b = 1
+LET n = 10
+
+100 PRINT a
+LET t = b
+LET b = a + b
+LET a = t
+LET n = n - 1
+IF n == 0 THEN END
+GOTO 100
