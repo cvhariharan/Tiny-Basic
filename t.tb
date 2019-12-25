@@ -1,4 +1,0 @@
-LET a=0
-151 LET a = a+1
-PRINT a
-GOSUB 151

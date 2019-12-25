@@ -1,7 +1,7 @@
 #define FUNCTION_CALL 200
 #define FUNCTION_PROTO 205
 #define LINES 100
-#define STAKE_SIZE 2000
+#define STAKE_SIZE 1024
 
 #include "lexer.h"
 #include "symboltable.h"
@@ -44,60 +44,62 @@ int main(int argc, char *argv[]) {
     // tokArr = malloc(sizeof(Token) * MAX_TOKENS);
     input = malloc(sizeof(char) * MAX_STRLEN);
     // printf("Started");
-    // filename = (char *)malloc(MAX_STRLEN * sizeof(char));
-    // printf("Valid: %d\n", isValidToken(";"));
-    // if (argc == 2)
-    // {
-    // filename = argv[1];
-    FILE *fptr;
-    if ((fptr = fopen("t.tb", "r")) == NULL) {
-        printf("Error! opening file");
-        // Program exits if file pointer returns NULL.
-        exit(1);
-    }
+    filename = (char *)malloc(MAX_STRLEN * sizeof(char));
+    if (argc == 2) {
+        filename = argv[1];
+        FILE *fptr;
+        if ((fptr = fopen(filename, "r")) == NULL) {
+            printf("Error! opening file");
+            // Program exits if file pointer returns NULL.
+            exit(1);
+        }
 
-    // Read the file into program array
-    int i = 0;
-    while (fgets(input, 255, (FILE *)fptr)) {
-        program[i] = (char *)malloc(sizeof(char) * MAX_STM);
-        strcpy(program[i], input);
-        i++;
+        // Read the file into program array
+        int i = 0;
+        while (fgets(input, 255, (FILE *)fptr)) {
+            program[i] = (char *)malloc(sizeof(char) * MAX_STM);
+            strcpy(program[i], input);
+            Token *t = getTokens(program[i]);
+            if (t[0].type == NUM) {
+                mappings[i] = t[0].value;
+            }
+            i++;
+        }
+
+        while (pc < i) {
+            tokenIndex = 0;
+            tokArr = getTokens(program[pc]);
+
+            pc++;
+
+            parseLine();
+            free(tokArr);
+        }
+        for (int j = 0; j < i; j++) {
+            free(program[i]);
+        }
+        free(input);
+        freeTable();
     }
-    while(pc < i) {
-        tokenIndex = 0;
-        tokArr = getTokens(program[pc]);
-        pc++;
-        // printf("DEBUG 1 %d\n", pc);
-        parseLine();
-        // printf("DEBUG %d: %s\n", pc, program[pc]);
-        // for (int j = 0; j < MAX_TOKENS; j++)
-        // {
-        //   if (tokArr[j].value != NULL)
-        //   {
-        //     printf("%s : %d\n", tokArr[j].value, tokArr[j].type);
-        //   }
-        // }
-        free(tokArr);
-    }
-    for(int j = 0; j < i; j++) {
-        free(program[i]);
-    }
-    // free(tokArr);
-    free(input);
-    freeTable();
-    // }
     return 0;
 }
 
 // Push to stack
 void push(int n) {
     sp++;
+    if (sp == STAKE_SIZE) {
+        printf("ERROR: Stack size exceeded!");
+        return;
+    }
     stack[sp] = n;
 }
 
 // Pop from stack
 int pop() {
-    return stack[sp--];
+    if (sp != -1) {
+        return stack[sp--];
+    }
+    return -1;
 }
 
 // Get the top value from the stack
@@ -106,9 +108,9 @@ int peek() {
 }
 
 int getLabelPos(char *label) {
-    for(int i = 0; i < LINES; i++) {
-        if(mappings[i] != NULL) {
-            if(strcmp(mappings[i], label) == 0) {
+    for (int i = 0; i < LINES; i++) {
+        if (mappings[i] != NULL) {
+            if (strcmp(mappings[i], label) == 0) {
                 return i;
             }
         }
@@ -125,7 +127,7 @@ Token eat(int type) {
         advance();
         return tokArr[tokenIndex - 1];
     } else {
-        printf("Error: Could not parse");
+        printf("Error: Could not parse\n");
         // exit(1);
     }
 }
@@ -141,11 +143,9 @@ int getRelational(int token) {
 
 int parseLine() {
     if (tokArr[tokenIndex].type == NUM) {
-        // pc is incremented before parseLine is called, so decrement
-        mappings[pc-1] = eat(NUM).value;
+        eat(NUM);
     }
     parseStatement();
-    // printf("Oth %s\n", tokArr[tokenIndex].value);
 }
 
 int parseStatement() {
@@ -157,14 +157,16 @@ int parseStatement() {
             eat(ASSIGN);
             int val = parseExpression();
             insertVariable(var.value, val, NUM);
-            break;
         }
+            eat(ENTER);
+            break;
 
         case PRINT:
             eat(PRINT);
             char *val = parseExprList();
             printf("%s\n", val);
             free(val);
+            eat(ENTER);
             break;
 
         case IF: {
@@ -203,8 +205,10 @@ int parseStatement() {
                     if (op1 <= op2) {
                         cond = 1;
                     }
+                    break;
             }
-            break;
+            // printf("DEBUG COND: %d\n", cond);
+
             if (cond) {
                 eat(THEN);
                 parseStatement();
@@ -228,15 +232,27 @@ int parseStatement() {
                 } else {
                     printf("Variable Not Found!");
                 }
-                if(tokArr[tokenIndex].type != COMMA) {
-                  break;
+                if (tokArr[tokenIndex].type != COMMA) {
+                    break;
                 }
                 eat(COMMA);
                 var = tokArr[tokenIndex];
                 tokenIndex++;
             }
-            break;
         }
+            eat(ENTER);
+            break;
+
+        case GOTO: {
+            eat(GOTO);
+            int value = parseExpression();
+            char label[5];
+            sprintf(label, "%d", value);
+            pc = getLabelPos(label);
+            // printf("DEBUG: %d\n", pc);
+        }
+            eat(ENTER);
+            break;
 
         case GOSUB: {
             push(pc);
@@ -246,9 +262,25 @@ int parseStatement() {
             sprintf(label, "%d", value);
             pc = getLabelPos(label);
         }
-        break;
+            eat(ENTER);
+            break;
+
+        case RETURN: {
+            eat(RETURN);
+            int jmp = pop();
+            // printf("DEBUG: %d\n", jmp);
+            if (jmp != -1) {
+                // pc is incremented before being pushed to the stack
+                pc = jmp;
+            }
+        }
+            eat(ENTER);
+            break;
+
+        case END: {
+            exit(0);
+        }
     }
-    eat(ENTER);
     // printf("PRINT\n");
     return 0;
 }
