@@ -13,6 +13,7 @@
 #define END 13
 #define THEN 14
 #define ENTER 15
+#define REM 16
 
 // Operators
 #define PLUS 34

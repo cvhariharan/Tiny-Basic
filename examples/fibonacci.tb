@@ -1,3 +1,4 @@
+REM This code prints n fibonacci numbers
 LET a = 0
 LET b = 1
 LET n = 10

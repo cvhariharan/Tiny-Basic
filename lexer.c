@@ -204,6 +204,8 @@ int getType(char *token) {
         return RUN;
     else if (0 == strcmp(token, "END"))
         return END;
+    else if (0 == strcmp(token, "REM"))
+        return REM;
 
     // Operators
     else if (0 == strcmp(token, "+"))

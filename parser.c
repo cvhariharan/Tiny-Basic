@@ -164,7 +164,7 @@ int parseStatement() {
         case PRINT:
             eat(PRINT);
             char *val = parseExprList();
-            printf("%s\n", val);
+            printf("%s", val);
             free(val);
             eat(ENTER);
             break;
@@ -275,6 +275,10 @@ int parseStatement() {
             }
         }
             eat(ENTER);
+            break;
+        
+        case REM:
+            //Processing comments
             break;
 
         case END: {
