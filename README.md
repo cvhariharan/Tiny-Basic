@@ -9,7 +9,7 @@ A tiny basic interpreter in C. Does not follow the exact language spec as I coul
 build/tbc examples/fibonacci.tb
 ```
 
-Example Programs  
+### Example Programs  
 **Fibonacci**
 ```basic
 REM This code prints n fibonacci numbers
