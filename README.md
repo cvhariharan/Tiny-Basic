@@ -27,7 +27,7 @@ LET n = n - 1
 GOTO 100
 ```
   
- **Get me those stars**
+ **Gimme some stars**
  ```basic
  PRINT "How many stars do you want?"
 LET stars = 0
