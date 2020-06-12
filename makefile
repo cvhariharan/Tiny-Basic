@@ -1,3 +1,3 @@
-parser: parser.c lexer.c symboltable.c
-	gcc parser.c lexer.c symboltable.c -g -o parser
+parser: src/parser.c src/lexer.c src/symboltable.c
+	gcc src/parser.c src/lexer.c src/symboltable.c -g -o build/parser
 
