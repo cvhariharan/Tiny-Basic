@@ -6,6 +6,9 @@
 #include <stdlib.h>
 #include "lexer.h"
 
+//local declarations
+int getPos(char *var);
+
 // SymbolTable
 Symbol *st = NULL;
 int stSize = 0;
