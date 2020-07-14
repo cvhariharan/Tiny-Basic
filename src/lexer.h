@@ -1,3 +1,6 @@
+#ifndef _LEXER_H_
+#define _LEXER_H_
+
 #define MAX_STM 200
 #define MAX_INP 10000
 #define MAX_STRLEN 300
@@ -33,3 +36,5 @@ Token *getTokens(char *);
 int isunderscore(char);
 int isValidToken(char *);
 int findLongestToken(char *, Token *, int *);
+
+#endif //_LEXER_H_

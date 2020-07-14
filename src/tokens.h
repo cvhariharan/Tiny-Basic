@@ -1,3 +1,6 @@
+#ifndef _TOKENS_H_
+#define _TOKENS_H_
+
 #define ID 80
 // Keywords
 #define PRINT 3
@@ -69,3 +72,5 @@
 #define NUM 75
 #define S_LITERAL 76
 #define FUNC 79
+
+#endif //_TOKENS_H_
