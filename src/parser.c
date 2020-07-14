@@ -164,7 +164,7 @@ int parseStatement() {
         case PRINT:
             eat(PRINT);
             char *val = parseExprList();
-            printf("%s", val);
+            printf("\n%s", val);
             free(val);
             eat(ENTER);
             break;
