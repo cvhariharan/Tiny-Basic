@@ -11,6 +11,7 @@ Token *getTokens(char *input) {
     int i;
     int slen = 0;
     int tokenCount = 0;
+    int retType;
 
     
 
@@ -35,12 +36,14 @@ Token *getTokens(char *input) {
                 } else {
                     token[slen] = '\0';
                     slen = 0;
-                    if (getType(token) == -1) {
+                    
+                    retType = getType(token);
+                    if (retType == -1) {
                         tokArr[tokenCount].type = ID;
                     } else {
-                        tokArr[tokenCount].type = getType(token);
+                        tokArr[tokenCount].type = retType;
                     }
-                    tokArr[tokenCount].value = malloc(sizeof(char) * strlen(token));
+                    tokArr[tokenCount].value = malloc(sizeof(char) * (strlen(token) + 1));
                     strcpy(tokArr[tokenCount].value, token);
                     tokenCount++;
                     printf(" ");
@@ -63,7 +66,7 @@ Token *getTokens(char *input) {
                     token[slen] = '\0';
                     slen = 0;
                     tokArr[tokenCount].type = NUM;
-                    tokArr[tokenCount].value = malloc(sizeof(char) * strlen(token));
+                    tokArr[tokenCount].value = malloc(sizeof(char) * (strlen(token) + 1));
                     strcpy(tokArr[tokenCount].value, token);
                     tokenCount++;
                     printf(" ");
@@ -87,7 +90,7 @@ Token *getTokens(char *input) {
             }
             literal[literalLen] = '\0';
             tokArr[tokenCount].type = S_LITERAL;
-            tokArr[tokenCount].value = malloc(sizeof(char) * strlen(literal));
+            tokArr[tokenCount].value = malloc(sizeof(char) * (strlen(literal) + 1));
             strcpy(tokArr[tokenCount].value, literal);
             tokenCount++;
         }
@@ -136,7 +139,7 @@ Token *getTokens(char *input) {
  * Method to find the longest valid token
  * from the given longest special characters token
  **/
-int findLongestToken(char *token, Token *tokArr, int *tokenCount) {
+void findLongestToken(char *token, Token *tokArr, int *tokenCount) {
     char *temp = malloc(sizeof(char) * MAX_TOK_LEN);
     char *longToken = malloc(sizeof(char) * MAX_TOK_LEN);
     int i, m = 0;
@@ -151,7 +154,7 @@ int findLongestToken(char *token, Token *tokArr, int *tokenCount) {
             // printf("%s ", longToken);
             // printf("%d ", getType(longToken));
             tokArr[*tokenCount].type = getType(longToken);
-            tokArr[*tokenCount].value = malloc(sizeof(char) * strlen(longToken));
+            tokArr[*tokenCount].value = malloc(sizeof(char) * (strlen(longToken) + 1 ));
             strcpy(tokArr[*tokenCount].value, longToken);
             (*tokenCount)++;
             m = 0;
@@ -161,10 +164,13 @@ int findLongestToken(char *token, Token *tokArr, int *tokenCount) {
     }
     // printf("%s ", longToken);
     // printf("%d ", getType(longToken));
-    tokArr[*tokenCount].type = getType(longToken);
-    tokArr[*tokenCount].value = malloc(sizeof(char) * strlen(longToken));
-    strcpy(tokArr[*tokenCount].value, longToken);
-    (*tokenCount)++;
+    if( m!=0 )
+    {
+        tokArr[*tokenCount].type = getType(longToken);
+        tokArr[*tokenCount].value = malloc(sizeof(char) * (strlen(longToken) + 1 ));
+        strcpy(tokArr[*tokenCount].value, longToken);
+        (*tokenCount)++;
+    }
     free(longToken);
     free(temp);
 }

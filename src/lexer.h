@@ -35,6 +35,6 @@ int getType(char *);
 Token *getTokens(char *);
 int isunderscore(char);
 int isValidToken(char *);
-int findLongestToken(char *, Token *, int *);
+void findLongestToken ( char* token, Token* tokArr, int* tokenCount );
 
 #endif //_LEXER_H_
