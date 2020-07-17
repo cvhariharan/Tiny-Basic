@@ -18,15 +18,15 @@ void insertVariable(char *var, int value, int type) {
         st = (Symbol *)malloc(sizeof(Symbol) * ST_SIZE);
     }
     Symbol s;
-    s.variable = (char *)malloc(sizeof(char) * strlen(var));
+    s.variable = (char *)malloc(sizeof(char) * (strlen(var) + 1));
     // s.value = (char *)malloc(sizeof(char) * MAX_TOK_LEN);
 
     strcpy(s.variable, var);
     s.value = value;
     s.type = type;
 
-    if(getSymbol(var) != NULL) {
-        int pos = getPos(var);
+    int pos = getPos(var);
+    if(pos != -1) {
         free(st[pos].variable);
         st[pos] = s;
         return;

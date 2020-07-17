@@ -37,9 +37,9 @@ int sp = -1;
 int pc = 0;
 
 int main(int argc, char *argv[]) {
-    char *stmts[MAX_STM];
+    //char *stmts[MAX_STM];
     char *input, *filename;
-    FILE *fp;
+    //FILE *fp;
 
     // tokArr = malloc(sizeof(Token) * MAX_TOKENS);
     input = malloc(sizeof(char) * MAX_STRLEN);
@@ -72,6 +72,7 @@ int main(int argc, char *argv[]) {
 
             pc++;
 
+        
             parseLine();
             free(tokArr);
         }
