@@ -6,6 +6,7 @@
 #include "lexer.h"
 #include "symboltable.h"
 #include "tokens.h"
+#include "core.h"
 
 #include <ctype.h>
 #include <stdio.h>
@@ -30,8 +31,7 @@ int tokenIndex = 0;
 Token *tokArr;
 char *mappings[LINES];
 char *program[LINES];
-int stack[STAKE_SIZE];
-int sp = -1;
+Stack * stack=NULL;
 
 // Program counter
 int pc = 0;
@@ -87,25 +87,31 @@ int main(int argc, char *argv[]) {
 
 // Push to stack
 void push(int n) {
-    sp++;
-    if (sp == STAKE_SIZE) {
-        printf("ERROR: Stack size exceeded!");
-        return;
-    }
-    stack[sp] = n;
+    Stack * tmp= (Stack *)malloc(sizeof(Stack));
+    tmp->prev=stack;
+    tmp->value = n;
+    //and move to the new node
+    stack = tmp;
 }
 
 // Pop from stack
 int pop() {
-    if (sp != -1) {
-        return stack[sp--];
+    if(stack ==NULL)
+    {
+        return -1;
     }
-    return -1;
+    int n = stack->value;
+    Stack * tmp = stack;
+    
+    stack=stack->prev;//return 1 step
+    free(tmp);
+    
+    return n;
 }
 
 // Get the top value from the stack
 int peek() {
-    return stack[sp];
+    return stack->value;
 }
 
 int getLabelPos(char *label) {
