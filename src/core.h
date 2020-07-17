@@ -3,7 +3,7 @@
 
 //here defining some structure for the program
 struct Stack{
-    struct Stack *prev,*next;
+    struct Stack *prev;
     int value;
 };
 
