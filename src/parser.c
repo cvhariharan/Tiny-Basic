@@ -31,7 +31,7 @@ int tokenIndex = 0;
 Token *tokArr;
 char *mappings[LINES];
 char *program[LINES];
-Stack * stack=NULL;
+Stack *stack=NULL;
 
 // Program counter
 int pc = 0;
@@ -87,7 +87,7 @@ int main(int argc, char *argv[]) {
 
 // Push to stack
 void push(int n) {
-    Stack * tmp= (Stack *)malloc(sizeof(Stack));
+    Stack *tmp= (Stack *)malloc(sizeof(Stack));
     tmp->prev=stack;
     tmp->value = n;
     //and move to the new node
@@ -96,12 +96,12 @@ void push(int n) {
 
 // Pop from stack
 int pop() {
-    if(stack ==NULL)
+    if(stack == NULL)
     {
         return -1;
     }
     int n = stack->value;
-    Stack * tmp = stack;
+    Stack *tmp = stack;
     
     stack=stack->prev;//return 1 step
     free(tmp);
