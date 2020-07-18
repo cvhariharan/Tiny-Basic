@@ -7,7 +7,7 @@
 #include "lexer.h"
 
 //local declarations
-int getPos(char *var);
+int getSymbolPos(char *var);
 
 // SymbolTable
 Symbol *st = NULL;
@@ -25,7 +25,7 @@ void insertVariable(char *var, int value, int type) {
     s.value = value;
     s.type = type;
 
-    int pos = getPos(var);
+    int pos = getSymbolPos(var);
     if(pos != -1) {
         free(st[pos].variable);
         st[pos] = s;
@@ -49,7 +49,7 @@ Symbol *getSymbol(char *var) {
     return NULL;
 }
 
-int getPos(char *var) {
+int getSymbolPos(char *var) {
     if (st == NULL) {
         return -1;
     }
