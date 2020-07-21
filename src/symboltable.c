@@ -7,48 +7,57 @@
 #include "lexer.h"
 
 //local declarations
-int getSymbolPos(char *var);
+//int getSymbolPos(char *var);
 
 // SymbolTable
 Symbol *st = NULL;
-int stSize = 0;
 
 void insertVariable(char *var, int value, int type) {
-    if (st == NULL) {
-        st = (Symbol *)malloc(sizeof(Symbol) * ST_SIZE);
-    }
-    Symbol s;
-    s.variable = (char *)malloc(sizeof(char) * (strlen(var) + 1));
-    // s.value = (char *)malloc(sizeof(char) * MAX_TOK_LEN);
-
-    strcpy(s.variable, var);
-    s.value = value;
-    s.type = type;
-
-    int pos = getSymbolPos(var);
-    if(pos != -1) {
-        free(st[pos].variable);
-        st[pos] = s;
+    Symbol *tmp = getSymbol(var);
+    if(tmp != NULL)
+    {
+        tmp->value = value;
         return;
     }
-    st[stSize] = s;
-    // printf("%d - %s\n", stSize, st[stSize].variable);
-    stSize++;
+
+    Symbol *s = (Symbol *)malloc(sizeof(Symbol));
+
+    s->variable = (char *)malloc(sizeof(char) * (strlen(var) + 1));
+    // s.value = (char *)malloc(sizeof(char) * MAX_TOK_LEN);
+
+    strcpy(s->variable, var);
+    s->value = value;
+    s->type = type;
+    s->next = NULL;
+
+    if(st == NULL)
+    {
+        st = s;
+    }
+    else
+    {
+        tmp = st;
+        while(tmp->next)
+        {
+            tmp = tmp->next;
+        }
+        tmp->next = s;
+    }
 }
 
 Symbol *getSymbol(char *var) {
-    if (st == NULL) {
-        return NULL;
-    }
-    for (int i = 0; i < stSize; i++) {
+    Symbol *tmp = st;
+
+    while (tmp) {
         // printf("%d - %s\n", i, st[i].variable);
-        if (*(st[i].variable) == *var) {
-            return &st[i];
+        if (*tmp->variable == *var) {
+            return tmp;
         }
+        tmp = tmp->next;
     }
     return NULL;
 }
-
+/*
 int getSymbolPos(char *var) {
     if (st == NULL) {
         return -1;
@@ -60,8 +69,17 @@ int getSymbolPos(char *var) {
         }
     }
     return -1;
-}
+}*/
 
 void freeTable() {
-    free(st);
+    //free(st);
+    Symbol *tmp;
+
+    while(st)
+    {
+        tmp = st->next;
+        free(st);
+        st = tmp;
+    }
+    st = NULL;
 }

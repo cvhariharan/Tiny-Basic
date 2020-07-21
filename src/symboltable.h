@@ -5,6 +5,7 @@ typedef struct Symbols{
     char *variable;
     int type;
     int value;
+    struct Symbols * next;
 } Symbol;
 
 Symbol *getSymbol(char *);
