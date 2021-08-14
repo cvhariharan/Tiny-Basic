@@ -15,20 +15,21 @@
 
 void advance();
 
-Token eat(int);
+Token* eat(int type);
 
 char *parseExprList();
 
 int getRelational(int);
-int parseLine();
+void parseLine();
 int parseStatement();
 int parseExpression();
 int parseTerm();
 int parseFactor();
 
 // Global Variables
-int tokenIndex = 0;
-Token *tokArr;
+//int tokenIndex = 0;
+Token *tokHead;
+Token *tokCur;//current index of the Token
 char *mappings[LINES];
 char *program[LINES];
 Stack *stack=NULL;
@@ -67,14 +68,13 @@ int main(int argc, char *argv[]) {
         }
 
         while (pc < i) {
-            tokenIndex = 0;
-            tokArr = getTokens(program[pc]);
-
+            tokHead = getTokens(program[pc]);
+            tokCur = tokHead;
             pc++;
 
         
             parseLine();
-            free(tokArr);
+            freeTokens(tokHead);
         }
         for (int j = 0; j < i; j++) {
             free(program[i]);
@@ -126,16 +126,21 @@ int getLabelPos(char *label) {
 }
 
 // advance the tokencount
-void advance() { tokenIndex++; }
+void advance() { 
+    //tokenIndex++;
+    tokCur = tokCur->next;
+}
 
-Token eat(int type) {
+Token *eat(int type) {
     // Returns the type if correct
-    if (tokArr[tokenIndex].type == type) {
+    Token *ret = tokCur;
+    if (tokCur->type == type) {
         advance();
-        return tokArr[tokenIndex - 1];
+        return ret;
     } else {
         printf("Error: Could not parse\n");
         // exit(1);
+        return NULL;
     }
 }
 
@@ -148,22 +153,22 @@ int getRelational(int token) {
     return -1;
 }
 
-int parseLine() {
-    if (tokArr[tokenIndex].type == NUM) {
+void parseLine() {
+    if (tokCur->type == NUM) {
         eat(NUM);
     }
     parseStatement();
 }
 
 int parseStatement() {
-    switch (tokArr[tokenIndex].type) {
+    switch (tokCur->type) {
         case LET: {
-            Token var;
+            Token *var;
             eat(LET);
             var = eat(ID);
             eat(ASSIGN);
             int val = parseExpression();
-            insertVariable(var.value, val, NUM);
+            insertVariable(var->value, val, NUM);
         }
             eat(ENTER);
             break;
@@ -180,7 +185,7 @@ int parseStatement() {
             int cond = 0;
             eat(IF);
             int op1 = parseExpression();
-            int operator= eat(getRelational(tokArr[tokenIndex].type)).type;
+            int operator= eat(getRelational(tokCur->type))->type;
             int op2 = parseExpression();
             switch (operator) {
                 case EQUALTO:
@@ -224,27 +229,27 @@ int parseStatement() {
         }
 
         case INPUT: {
-            Token var;
+            Token *var;
             eat(INPUT);
 
             // var-list parser
-            var = tokArr[tokenIndex];
-            tokenIndex++;
-            while (var.type != ENTER) {
+            var = tokCur;
+            tokCur = tokCur->next;
+            while (var->type != ENTER) {
                 int t;
-                Symbol *sVar = getSymbol(var.value);
+                Symbol *sVar = getSymbol(var->value);
                 if (sVar != NULL) {
                     scanf("%d", &t);
                     sVar->value = t;
                 } else {
                     printf("Variable Not Found!");
                 }
-                if (tokArr[tokenIndex].type != COMMA) {
+                if (tokCur->type != COMMA) {
                     break;
                 }
                 eat(COMMA);
-                var = tokArr[tokenIndex];
-                tokenIndex++;
+                var = tokCur;
+                tokCur = tokCur->next;
             }
         }
             eat(ENTER);
@@ -299,9 +304,9 @@ int parseStatement() {
 char *parseExprList() {
     char *expr = (char *)malloc(sizeof(char) * MAX_INP);
     strcpy(expr, "");
-    if (tokArr[tokenIndex].type == S_LITERAL) {
+    if (tokCur->type == S_LITERAL) {
         // printf("Sl\n");
-        strcat(expr, tokArr[tokenIndex].value);
+        strcat(expr, tokCur->value);
         eat(S_LITERAL);
     } else {
         // printf("Exprs\n");
@@ -311,7 +316,7 @@ char *parseExprList() {
         strcat(expr, value);
     }
 
-    if (tokArr[tokenIndex].type == COMMA) {
+    if (tokCur->type == COMMA) {
         eat(COMMA);
         strcat(expr, parseExprList());
     }
@@ -321,7 +326,7 @@ char *parseExprList() {
 
 int parseExpression() {
     int op = parseTerm();
-    switch (tokArr[tokenIndex].type) {
+    switch (tokCur->type) {
         case PLUS:
             eat(PLUS);
             op = op + parseTerm();
@@ -337,7 +342,7 @@ int parseExpression() {
 
 int parseTerm() {
     int op = parseFactor();
-    switch (tokArr[tokenIndex].type) {
+    switch (tokCur->type) {
         case MUL:
             eat(MUL);
             op = op * parseFactor();
@@ -353,22 +358,22 @@ int parseTerm() {
 }
 
 int parseFactor() {
-    switch (tokArr[tokenIndex].type) {
+    switch (tokCur->type) {
         case ID: {
             // printf("ID\n");
-            Token var;
+            Token *var;
             var = eat(ID);
-            return getSymbol(var.value)->value;
+            return getSymbol(var->value)->value;
         } break;
         case NUM: {
-            Token var;
+            Token *var;
             var = eat(NUM);
             // printf("FACTOR: %d\n", atoi(var.value));
-            return atoi(var.value);
+            return atoi(var->value);
         }
             // default: error();
     }
-    if (tokArr[tokenIndex].type == LEFTPAR) {
+    if (tokCur->type == LEFTPAR) {
         int op = parseExpression();
         eat(RIGHTPAR);
         return op;

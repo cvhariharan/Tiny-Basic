@@ -16,6 +16,7 @@
 typedef struct Tokens{
   int type;
   char *value;
+  struct Tokens *next;
 } Token;
 
 typedef struct Directives{
@@ -33,8 +34,9 @@ typedef struct Directives{
 Directive *directives(char *);
 int getType(char *);
 Token *getTokens(char *);
+void freeTokens(Token *);
 int isunderscore(char);
 int isValidToken(char *);
-void findLongestToken ( char *token, Token* tokArr, int* tokenCount );
+Token **findLongestToken(char *, Token **);
 
 #endif //_LEXER_H_

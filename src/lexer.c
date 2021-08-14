@@ -6,14 +6,18 @@
 #include "tokens.h"
 
 Token *getTokens(char *input) {
-    Token *tokArr = malloc(sizeof(Token) * MAX_TOKENS);
+    Token *tokHead = NULL; //malloc(sizeof(Token));
+    Token **tokPtr;// a var help to faster access
+    Token * tmp;
+    
+    tokPtr= &tokHead; 
+    
     char *token = malloc(sizeof(char) * MAX_TOK_LEN);
     int i;
     int slen = 0;
-    int tokenCount = 0;
+    //int tokenCount = 0;
     int retType;
 
-    
 
     //If set, treat the input as code else it could be comment or string literal
     int isCode = 1;
@@ -38,14 +42,19 @@ Token *getTokens(char *input) {
                     slen = 0;
                     
                     retType = getType(token);
+                    tmp = (Token *) malloc(sizeof(Token));
+                    tmp->next = NULL;
+                    
                     if (retType == -1) {
-                        tokArr[tokenCount].type = ID;
+                        tmp->type = ID;
                     } else {
-                        tokArr[tokenCount].type = retType;
+                        tmp->type = retType;
                     }
-                    tokArr[tokenCount].value = malloc(sizeof(char) * (strlen(token) + 1));
-                    strcpy(tokArr[tokenCount].value, token);
-                    tokenCount++;
+                    tmp->value = malloc(sizeof(char) * (strlen(token) + 1));
+                    strcpy(tmp->value, token);
+                    *tokPtr = tmp;
+                    tokPtr = &(*tokPtr)->next;
+                    
                     printf(" ");
                     strcpy(token, "");
                     break;
@@ -65,10 +74,17 @@ Token *getTokens(char *input) {
                 } else {
                     token[slen] = '\0';
                     slen = 0;
-                    tokArr[tokenCount].type = NUM;
-                    tokArr[tokenCount].value = malloc(sizeof(char) * (strlen(token) + 1));
-                    strcpy(tokArr[tokenCount].value, token);
-                    tokenCount++;
+                    
+                    tmp = (Token *) malloc(sizeof(Token));
+                    tmp->next = NULL;
+                    
+                    tmp->type = NUM;
+                    tmp->value = malloc(sizeof(char) * (strlen(token) + 1));
+                    strcpy(tmp->value, token);
+                    
+                    *tokPtr = tmp;
+                    tokPtr = &(*tokPtr)->next;
+                    
                     printf(" ");
                     strcpy(token, "");
                     break;
@@ -88,11 +104,17 @@ Token *getTokens(char *input) {
                 literal[literalLen++] = input[i];
                 i++;
             }
+            
+            tmp = (Token *) malloc(sizeof(Token));
+            tmp->next = NULL;
+            
             literal[literalLen] = '\0';
-            tokArr[tokenCount].type = S_LITERAL;
-            tokArr[tokenCount].value = malloc(sizeof(char) * (strlen(literal) + 1));
-            strcpy(tokArr[tokenCount].value, literal);
-            tokenCount++;
+            tmp->type = S_LITERAL;
+            tmp->value = malloc(sizeof(char) * (strlen(literal) + 1));
+            strcpy(tmp->value, literal);
+            
+            *tokPtr = tmp;
+            tokPtr = &(*tokPtr)->next;
         }
         // if (!isCode) {
         //     if (input[i] != '\\') {
@@ -122,24 +144,47 @@ Token *getTokens(char *input) {
                 } else {
                     token[slen] = '\0';
                     slen = 0;
-                    findLongestToken(token, tokArr, &tokenCount);
+                    tokPtr = findLongestToken(token, tokPtr);
                     break;
                 }
                 i++;
             }
         }
     }
-    tokArr[tokenCount].type = ENTER;
-    tokArr[tokenCount].value = "CR";
+    
+    tmp = (Token *) malloc(sizeof(Token));
+    tmp->next = NULL;
+    
+    tmp->type = ENTER;
+    tmp->value = "CR";
+    
+    *tokPtr = tmp;
+    
     free(token);
-    return tokArr;
+    return tokHead;
+}
+
+void freeTokens(Token *tok)
+{
+    Token *tmp;
+    
+    while(tok)
+    {
+        tmp = tok->next;
+        free(tok->value);
+        free(tok);
+        
+        tok = tmp;
+    }
 }
 
 /** 
  * Method to find the longest valid token
  * from the given longest special characters token
+ * tokCur is the last Token in the list, will help us to link the new nodes
  **/
-void findLongestToken(char *token, Token *tokArr, int *tokenCount) {
+Token **findLongestToken(char *token, Token **tokPtr) {
+    Token *tmp;
     char *temp = malloc(sizeof(char) * MAX_TOK_LEN);
     char *longToken = malloc(sizeof(char) * MAX_TOK_LEN);
     int i, m = 0;
@@ -153,10 +198,16 @@ void findLongestToken(char *token, Token *tokArr, int *tokenCount) {
         } else {
             // printf("%s ", longToken);
             // printf("%d ", getType(longToken));
-            tokArr[*tokenCount].type = getType(longToken);
-            tokArr[*tokenCount].value = malloc(sizeof(char) * (strlen(longToken) + 1 ));
-            strcpy(tokArr[*tokenCount].value, longToken);
-            (*tokenCount)++;
+            tmp = (Token *) malloc(sizeof(Token));
+            
+            tmp->next = NULL;
+            tmp->type = getType(longToken);
+            tmp->value = malloc(sizeof(char) * (strlen(longToken) + 1 ));
+            strcpy(tmp->value, longToken);
+            
+            *tokPtr = tmp;
+            tokPtr = &(*tokPtr)->next;
+            
             m = 0;
             //To consider the already considered character in the invalid token
             i--;
@@ -166,13 +217,19 @@ void findLongestToken(char *token, Token *tokArr, int *tokenCount) {
     // printf("%d ", getType(longToken));
     if( m!=0 )
     {
-        tokArr[*tokenCount].type = getType(longToken);
-        tokArr[*tokenCount].value = malloc(sizeof(char) * (strlen(longToken) + 1 ));
-        strcpy(tokArr[*tokenCount].value, longToken);
-        (*tokenCount)++;
+        tmp = (Token *) malloc(sizeof(Token));
+            
+        tmp->next = NULL;
+        tmp->type = getType(longToken);
+        tmp->value = malloc(sizeof(char) * (strlen(longToken) + 1 ));
+        strcpy(tmp->value, longToken);
+        *tokPtr = tmp;
+        tokPtr = &(*tokPtr)->next;
     }
     free(longToken);
     free(temp);
+    
+    return tokPtr;
 }
 
 int isValidToken(char *token) {
